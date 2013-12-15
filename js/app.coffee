@@ -67,7 +67,7 @@ class Earth extends Thing
         # Geocentric universe here!
         
 class Moon extends Thing
-    mass: 5
+    mass: 10
     constructor: (el)->
         vect= new Vector(MAX_X / 2 + 240, MAX_Y / 2, 0, -8000000 / (GAME_SPEED /  GRAV_CONSTANT) )
         super vect, 10, "moon", el
@@ -80,6 +80,29 @@ class Asteroid extends Thing
         @vec.loop_around()
         super other_bodies
 
+class Satellite extends Thing
+    update: (other_bodies)->
+        @vec.loop_around()
+        super other_bodies
+
+class Ship extends Thing
+    direction_radians: 0
+    is_forward = false
+    is_backward = false
+    is_counter_clockwise = false
+    is_clockwise = false
+    
+    update: (other_bodies)->
+        @vec.loop_around()
+        if @is_forward
+            @vec.vy -= 0.2
+        if @is_backward
+            @vec.vy += 0.1
+        if @is_counter_clockwise
+            @vec.vx -= 0.1
+        if @is_clockwise
+            @vec.vx += 0.1
+        super other_bodies
 
 new_thing_el = (thing)->
     el = document.createElement('div')
@@ -92,26 +115,36 @@ sat = ->
     y = MAX_Y / 2
     vect = new Vector(x, y, 0, 0)
     vect.orbit earth
-    thing = new Thing vect, 5,  "satellite"
+    thing = new Satellite vect, 5,  "satellite"
     thing.el = new_thing_el(thing)
     return thing
     
 asteriod = ->
     x = Math.random() * MAX_X
     y = if Math.random() > 0.5 then 0 else MAX_Y
-    yv = Math.random() * 1 - 2
-    xv = Math.random() * 1 - 2
+    yv = Math.random() * 0.25 - 0.5
+    xv = Math.random() * 2 - 4
     vect = new Vector(x, y, xv, yv )
     thing = new Asteroid vect, 5,  "asteriod"
     thing.el = new_thing_el(thing)
     return thing
-    
+
+a_ship = ->
+    x = MAX_X / 2 + 100
+    y = MAX_Y / 2
+    vec = new Vector(x, y, 0, 0)
+    vec.orbit earth
+    thing = new Ship vec, 7,  "ship"
+    thing.el = new_thing_el(thing)
+    return thing
+
 
 earth = new Earth document.getElementById('earth')
 moon = new Moon document.getElementById('moon')
+ship = a_ship()
 moon.vec.orbit earth
 grav_bodies = [earth, moon]    
-things = [earth, moon, sat(), sat(), sat(), sat(), sat(), sat(), sat(), sat(), sat(), asteriod(), asteriod(), asteriod()]
+things = [earth, moon, sat(), sat(), sat(), sat(), sat(), sat(), sat(), sat(), sat(), asteriod(), ship]
 
 game_step = ->
     for thing in things
@@ -122,10 +155,24 @@ game_step = ->
     
 
 setInterval(game_step, 1000 / GAME_SPEED)
-
 setInterval((->things.push(asteriod()) ), 2 * 1000 )
 
 
+
+
+$(document).keyup (evt)->
+    switch evt.which
+        when 87 then ship.is_forward = false
+        when 83 then ship.is_backward = false
+        when 65 then ship.is_counter_clockwise = false
+        when 68 then ship.is_clockwise = false
+
+$(document).keydown (evt)->
+    switch evt.which
+        when 87 then ship.is_forward = true
+        when 83 then ship.is_backward = true
+        when 65 then ship.is_counter_clockwise = true
+        when 68 then ship.is_clockwise = true
 
         
     
