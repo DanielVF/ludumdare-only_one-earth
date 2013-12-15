@@ -4,6 +4,11 @@ body{
     font-family: Gill Sans;
 }
 
+line { 
+    stroke-width: 2;
+    stroke: white;
+}
+
 #text { 
     font-size: 39px;
     margin-top: -200px;

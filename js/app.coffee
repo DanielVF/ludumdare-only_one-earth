@@ -89,6 +89,7 @@ class Asteroid extends Thing
         super other_bodies
 
 class Satellite extends Thing
+    beam_el: undefined
     payload_state: "scanning"
     range: 80
     recharge_time: 10
@@ -189,6 +190,11 @@ new_thing_el = (thing)->
     document.getElementById('viewport').appendChild(el)
     el.setAttribute("class", thing.class)
     return el
+    
+new_beam_el = ->
+    el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    document.getElementById('svg').appendChild(el)
+    return el
 
 sat = ->
     x = MAX_X / 2 +  Math.random() * 150 + 20
@@ -210,8 +216,6 @@ moon_sat = ->
 asteriod = ->
     x = MAX_X
     y = Math.random() * MAX_Y
-    # x = Math.random() * MAX_X
-    # y = if Math.random() > 0.5 then 0 else (MAX_Y - 3)
     yv = Math.random() * 0.25 - 0.15
     xv = Math.random() * 1 - 1.1
     vect = new Vector(x, y, xv, yv )
@@ -255,10 +259,22 @@ game_step = ->
         x.is_dead is false
     for thing in things
         thing.update(grav_bodies, things)
+    # Graphics    
     for thing in things
         el = thing.el
         el.style.left = thing.vec.x - thing.size / 2
         el.style.top = thing.vec.y - thing.size / 2
+        if (thing.target isnt null and thing.target isnt undefined) and (thing.target.is_dead isnt false)
+            if thing.beam_el is undefined
+                thing.beam_el = new_beam_el()
+            thing.beam_el.setAttribute('x1', thing.vec.x)
+            thing.beam_el.setAttribute('x2', thing.target.vec.x)
+            thing.beam_el.setAttribute('y1', thing.vec.y)
+            thing.beam_el.setAttribute('y2', thing.target.vec.y)
+        else
+            if thing.beam_el isnt undefined
+                thing.beam_el.parentNode.removeChild(thing.beam_el)
+                thing.beam_el = undefined
     
 
 setInterval(game_step, 1000 / GAME_SPEED)
