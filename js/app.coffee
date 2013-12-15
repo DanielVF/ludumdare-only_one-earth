@@ -10,19 +10,9 @@ pow = Math.pow
 class Vector
     constructor: (@x, @y, @vx, @vy)->
     
-    update: (other_bodies) ->
-        @grav_attract(thing) for thing in other_bodies
+    update: ->
         @x += @vx
         @y += @vy
-        
-        
-    grav_attract: (other)->
-        dist = @distance(other.vec)
-        pull = (1 / pow(dist, 2)) *  other.mass * GRAV_CONSTANT
-        offset_x =  (other.vec.x - @x ) / dist
-        offset_y =  (other.vec.y - @y) / dist
-        @vx += offset_x * pull
-        @vy += offset_y * pull
         
     
     loop_around: ->
@@ -56,18 +46,37 @@ class Thing
     
     update: (other_bodies)->
         if @is_attached is not true
-            @vec.update(other_bodies)
-        
+            @grav_attract(other) for other in other_bodies
+            @vec.update()
+            
+    grav_attract: (other)->
+        dist = @vec.distance(other.vec)
+        if dist < other.size
+            other.on_impact()
+        pull = (1 / pow(dist, 2)) *  other.mass * GRAV_CONSTANT
+        offset_x =  (other.vec.x - @vec.x ) / dist
+        offset_y =  (other.vec.y - @vec.y) / dist
+        @vec.vx += offset_x * pull
+        @vec.vy += offset_y * pull
+         
     kill: ->
         @is_dead = true
         @el.parentNode.removeChild(@el) if @el isnt null and @el.parentNode
         
+    on_impact: ->
+        
         
 class Earth extends Thing
     mass: 100
+    population: 7199638685
+    
     constructor: (el)->
         center = new Vector(MAX_X / 2 ,MAX_Y / 2, 0, 0)
         super center, 20, "earth", el
+    
+    on_impact: (other)->
+        deaths = Math.ceil(@population*.1 + Math.random()*10000)
+        @population = Math.max(0, @population - deaths) 
         
     update: ->
         # Do nothing
@@ -167,7 +176,7 @@ class Satellite extends Thing
     pick_target: (things)->
         vec = @vec
         asteroids = _.filter things, (x)-> 
-            x.constructor.name is "Asteroid"
+            x.constructor.name is "Asteroid" and x.is_dead isnt true
         closest = _.sortBy(asteroids, ((x)->vec.distance(x.vec)))[0]
         if vec.distance(closest.vec) <= @range
             return closest
@@ -281,7 +290,8 @@ game_step = ->
         x.is_dead is false
     for thing in things
         thing.update(grav_bodies, things)
-    # Graphics    
+    # Graphics
+    $('.population').text("earth population: #{earth.population}")
     for thing in things
         el = thing.el
         el.style.left = thing.vec.x - thing.size / 2
@@ -370,15 +380,22 @@ $(document).keyup (evt)->
         when 83 then ship.is_backward = false
         when 65 then ship.is_counter_clockwise = false
         when 68 then ship.is_clockwise = false
-        when 32 then ship.is_attaching = false
+        when 32  
+            ship.is_attaching = false
+            evt.preventDefault()
+    return true
 
 $(document).keydown (evt)->
+    evt.preventDefault()
     switch evt.which
         when 87 then ship.is_forward = true
         when 83 then ship.is_backward = true
         when 65 then ship.is_counter_clockwise = true
         when 68 then ship.is_clockwise = true
-        when 32 then ship.is_attaching = true
+        when 32  
+            ship.is_attaching = true
+            evt.preventDefault()
+    return true
 
         
     
