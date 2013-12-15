@@ -10,11 +10,11 @@ line {
 }
 
 line.targetSize1 {
-    stroke-width: 0.5;
+    stroke-width: 0.25;
 }
 
 line.targetSize2 {
-    stroke-width: 1;
+    stroke-width: 0.5;
 }
 
 line.targetSize3 {

@@ -83,7 +83,7 @@ class Moon extends Thing
         super no_moon
         
 class Asteroid extends Thing
-    hp: 5
+    hp: 15
     
     update: (other_bodies)->
         @vec.loop_around()
@@ -116,9 +116,9 @@ class Satellite extends Thing
     target: null
     
     randomize_specs: ->
-        @range = 40 + Math.random() * 120
+        @range = 60 + (Math.pow(Math.random(), 4)) * 300
         @recharge_time = 2 + Math.random() * 8
-        @dps = 1 + Math.random() * 5
+        @dps = 0.5 + Math.random() * 4.5
         @lock_time = 0.1 + Math.random() * 5
     
     update: (other_bodies, things)->
@@ -293,7 +293,7 @@ game_step = ->
             thing.beam_el.setAttribute('x2', thing.target.vec.x)
             thing.beam_el.setAttribute('y1', thing.vec.y)
             thing.beam_el.setAttribute('y2', thing.target.vec.y)
-            thing.beam_el.setAttribute('class', 'targetSize'+thing.target.size)
+            thing.beam_el.setAttribute('class', 'targetSize'+Math.ceil(thing.dps))
         else
             if thing.beam_el isnt undefined
                 thing.beam_el.parentNode.removeChild(thing.beam_el)
