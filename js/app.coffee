@@ -51,8 +51,8 @@ class Thing
             
     grav_attract: (other)->
         dist = @vec.distance(other.vec)
-        if dist < other.size
-            other.on_impact()
+        if dist < other.size / 2
+            other.on_impact(this)
         pull = (1 / pow(dist, 2)) *  other.mass * GRAV_CONSTANT
         offset_x =  (other.vec.x - @vec.x ) / dist
         offset_y =  (other.vec.y - @vec.y) / dist
@@ -69,14 +69,27 @@ class Thing
 class Earth extends Thing
     mass: 100
     population: 7199638685
+    deaths: 0
     
     constructor: (el)->
         center = new Vector(MAX_X / 2 ,MAX_Y / 2, 0, 0)
         super center, 20, "earth", el
     
     on_impact: (other)->
-        deaths = Math.ceil(@population*.1 + Math.random()*10000)
-        @population = Math.max(0, @population - deaths) 
+        if other.constructor.name is "Asteroid"
+            size_factor = other.size * other.size
+            deaths = Math.ceil(@population*.01 * size_factor + Math.random()*10000 * size_factor )
+            @deaths += deaths 
+            @population = Math.max(0, @population - deaths)
+            other.kill()
+        else if other.constructor.name is "Ship"
+            other.vec.x = @vec.x + 65
+            other.vec.y = @vec.y + 10
+            other.vec.vx = 3
+            other.vec.vy = 3
+
+        else
+            other.kill()
         
     update: ->
         # Do nothing
@@ -283,6 +296,12 @@ create_asteriods = ->
         things.push(asteriod())
 
 
+pad = (num, size)->
+    s = num+""
+    while s.length < size
+        s = "0" + s
+    return s
+
 game_step = ->
     return if not game_running 
     create_asteriods()
@@ -291,7 +310,7 @@ game_step = ->
     for thing in things
         thing.update(grav_bodies, things)
     # Graphics
-    $('.population').text("earth population: #{earth.population}")
+    $('.population').html("earth population: #{pad(earth.population, 10)}<br>deaths: #{pad(earth.deaths, 10)}")
     for thing in things
         el = thing.el
         el.style.left = thing.vec.x - thing.size / 2
@@ -347,19 +366,25 @@ phases = [
     [15000, P.go 0.1]
     [  1500, P.text "Wave 2/5"]
     [  5000, P.go 0.2]
+    [300, P.go 6]
     [15000, P.go 0.3]
     [15000, P.go 0.1]
     [  1500, P.text "Wave 3/5"]
     [  5000, P.go 0.2]
+    [300, P.go 9]
     [15000, P.go 0.3]
     [15000, P.go 0.1]
     [  1500, P.text "Wave 4/5"]
     [  5000, P.go 0.2]
+    [300, P.go 12]
     [15000, P.go 0.6]
     [15000, P.go 0.1]
     [  1500, P.text "Wave 5/5"]
     [  5000, P.go 0.2]
+    [300, P.go 12]
     [15000, P.go 0.9]
+    [300, P.go 12]
+    [15000, P.go 24]
     [15000, P.go 0.4]
     
 ]
@@ -386,7 +411,6 @@ $(document).keyup (evt)->
     return true
 
 $(document).keydown (evt)->
-    evt.preventDefault()
     switch evt.which
         when 87 then ship.is_forward = true
         when 83 then ship.is_backward = true
@@ -398,4 +422,3 @@ $(document).keydown (evt)->
     return true
 
         
-    
