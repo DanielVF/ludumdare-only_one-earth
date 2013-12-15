@@ -325,8 +325,11 @@ current_phase = 0
 phases = [
     [  1500, P.text "there is only one\n<br>\nearth."]
     [  1500, P.text "you must save it"]
-    [  1500, P.text "WASD to move.\n<br>\nhold [SPACEBAR] to hold a satellite."]
+    [  1500, P.text "WASD to move."]
+    [  1500, P.text "hold [SPACEBAR] to hold a satellite."]
     [  1500, P.text "reposition satellites \n<br>\n to defend earth "]
+    [  500, P.text ""]
+    [  1500, P.text "Wave 1/5"]
     [  5000, P.go 0.1]
     [  5000, P.go 0.2]
     [15000, P.go 0.5]
