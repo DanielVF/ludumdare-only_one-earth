@@ -4,11 +4,18 @@ body{
     font-family: Gill Sans;
 }
 
+#text { 
+    font-size: 39px;
+    margin-top: -200px;
+    text-align: center;
+}
+
 #viewport{
     position: relative;
     width: 860px;
     height: 560px;
     border: solid 1px #444;
+    overflow: hidden;
 }
 
 #viewport > div {
@@ -43,7 +50,7 @@ body{
 #viewport > .ship {
     width: 7px;
     height: 7px;
-    background: #green;
+    background: green;
 }
 
 #viewport > .scanning {

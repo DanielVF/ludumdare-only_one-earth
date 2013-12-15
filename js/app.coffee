@@ -236,9 +236,19 @@ moon = new Moon document.getElementById('moon')
 ship = a_ship()
 moon.vec.orbit earth
 grav_bodies = [earth, moon]    
-things = [earth, moon, sat(), sat(), sat(), sat(), sat(), sat(), sat(), sat(), sat(), asteriod(), ship]
+things = [earth, moon, sat(), sat(), sat(), sat(), asteriod(), ship]
+
+game_running = true
+asteroid_rate = 1
+
+create_asteriods = ->
+    if Math.random() < asteroid_rate / GAME_SPEED
+        things.push(asteriod())
+
 
 game_step = ->
+    return if not game_running 
+    create_asteriods()
     things = _.filter things, (x)->
         x.is_dead is false
     for thing in things
@@ -250,11 +260,65 @@ game_step = ->
     
 
 setInterval(game_step, 1000 / GAME_SPEED)
-setInterval((->things.push(asteriod()) ), 0.2 * 1000 )
 setInterval((->things.push(moon_sat()) ), 5 * 1000 )
 
 
+P = {
+    text: (t)->
+        (-> 
+            $('#text').show().html(t)
+            # game_running = false
+        )
+    production: ->
+        
+    go: (rate)->
+        (->
+            $('#text').hide()
+            asteroid_rate = rate
+            game_running = true
+        )
+        
+}
 
+current_phase = 0
+phases = [
+    [  1500, P.text "there is only one\n<br>\nearth."]
+    [  1500, P.text "you must save it"]
+    [  1500, P.text "WASD to move.\n<br>\nhold [SPACEBAR] to hold a satellite."]
+    [  1500, P.text "reposition satellites \n<br>\n to defend earth "]
+    [  5000, P.go 1]
+    [  5000, P.go 1]
+    [15000, P.go 2]
+    [300, P.go 30]
+    [15000, P.go 1]
+    [  1500, P.text "Wave 2/5"]
+    [  5000, P.go 2]
+    [15000, P.go 3]
+    [15000, P.go 1]
+    [  1500, P.text "Wave 3/5"]
+    [  5000, P.go 2]
+    [15000, P.go 3]
+    [15000, P.go 1]
+    [  1500, P.text "Wave 4/5"]
+    [  5000, P.go 2]
+    [15000, P.go 6]
+    [15000, P.go 1]
+    [  1500, P.text "Wave 5/5"]
+    [  5000, P.go 2]
+    [15000, P.go 9]
+    [15000, P.go 1]
+    
+]
+
+nextPhase  = ->
+    [duration, fn] = phases[current_phase]
+    fn()
+    current_phase += 1
+    if phases[current_phase] isnt null
+        setTimeout nextPhase, duration
+
+game_step()
+nextPhase()
 
 $(document).keyup (evt)->
     switch evt.which
