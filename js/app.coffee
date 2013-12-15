@@ -23,6 +23,7 @@ class Vector
         offset_y =  (other.vec.y - @y) / dist
         @vx += offset_x * pull
         @vy += offset_y * pull
+        
     
     loop_around: ->
         if @x > MAX_X
@@ -87,6 +88,19 @@ class Asteroid extends Thing
     update: (other_bodies)->
         @vec.loop_around()
         super other_bodies
+    
+    kill: ->
+        if @size > 1
+            addtional =  if Math.random() > 0.5  then 2 else 1
+            for i in [1..addtional]
+                size = Math.ceil(Math.random() * @size)
+                vec = new Vector @vec.x, @vec.y, @vec.vx + Math.random() - 0.5, @vec.vy  + Math.random() - 0.5
+                a = new Asteroid vec, size, 'asteroid', el
+                el = new_thing_el(a)
+                a.el = el
+                el.setAttribute('class', el.getAttribute("class")+" size"+size)
+                things.push(a)
+        super
 
 class Satellite extends Thing
     beam_el: undefined
@@ -219,7 +233,7 @@ asteriod = ->
     yv = Math.random() * 0.25 - 0.15
     xv = Math.random() * 1 - 1.1
     vect = new Vector(x, y, xv, yv )
-    thing = new Asteroid vect, 5,  "asteriod"
+    thing = new Asteroid vect, 5,  "asteroid"
     thing.el = new_thing_el(thing)
     return thing
 
@@ -245,7 +259,7 @@ grav_bodies = [earth, moon]
 things = [earth, moon, sat(), sat(), sat(), sat(), asteriod(), ship, moon_sat(), moon_sat()]
 
 game_running = true
-asteroid_rate = 1
+asteroid_rate = 0.1
 
 create_asteriods = ->
     if Math.random() < asteroid_rate / GAME_SPEED
@@ -304,11 +318,11 @@ phases = [
     [  1500, P.text "you must save it"]
     [  1500, P.text "WASD to move.\n<br>\nhold [SPACEBAR] to hold a satellite."]
     [  1500, P.text "reposition satellites \n<br>\n to defend earth "]
+    [  5000, P.go 0.1]
     [  5000, P.go 0.2]
-    [  5000, P.go 0.5]
-    [15000, P.go 1]
-    [300, P.go 30]
-    [15000, P.go 1]
+    [15000, P.go 0.5]
+    [300, P.go 3]
+    [15000, P.go 0.1]
     [  1500, P.text "Wave 2/5"]
     [  5000, P.go 2]
     [15000, P.go 3]

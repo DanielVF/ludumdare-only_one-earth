@@ -46,10 +46,35 @@ line {
     background: #999;
 }
 
-#viewport > .asteriod {
+#viewport > .asteroid {
+    width: 6px;
+    height: 6px;
+    background: #f63;
+}
+
+#viewport > .asteroid.size5 {
     width: 5px;
     height: 5px;
-    background: #f63;
+}
+
+#viewport > .asteroid.size4 {
+    width: 4px;
+    height: 4px;
+}
+
+#viewport > .asteroid.size3 {
+    width: 3px;
+    height: 3px;
+}
+
+#viewport > .asteroid.size2 {
+    width: 2px;
+    height: 2px;
+}
+
+#viewport > .asteroid.size1 {
+    width: 1px;
+    height: 1px;
 }
 
 #viewport > .ship {
