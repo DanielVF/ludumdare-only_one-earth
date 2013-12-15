@@ -110,10 +110,16 @@ class Satellite extends Thing
     recharge_time: 5
     lock_chance: 0.3
     lock_time: 3
-    dps: 0.5
+    dps: 2.1
     recharging_counter: 0
     lock_counter: 0
     target: null
+    
+    randomize_specs: ->
+        @range = 40 + Math.random() * 120
+        @recharge_time = 2 + Math.random() * 8
+        @dps = 1 + Math.random() * 5
+        @lock_time = 0.1 + Math.random() * 5
     
     update: (other_bodies, things)->
         @vec.loop_around()
@@ -226,6 +232,7 @@ moon_sat = ->
     # vec.orbit(moon)
     thing = new Satellite vec, 5,  "satellite"
     thing.el = new_thing_el(thing)
+    thing.randomize_specs()
     return thing
     
 asteriod = ->
@@ -243,7 +250,7 @@ a_ship = ->
     y = MAX_Y / 2
     vec = new Vector(x, y, 0, 0)
     vec.orbit earth
-    thing = new Ship vec, 7,  "ship"
+    thing = new Ship vec, 9,  "ship"
     thing.el = new_thing_el(thing)
     return thing
 

@@ -6,7 +6,7 @@ body{
 
 line { 
     stroke-width: 2;
-    stroke: red;
+    stroke: white;
 }
 
 line.targetSize1 {
@@ -39,7 +39,7 @@ line.targetSize3 {
     position: absolute;
     width: 5px;
     height: 5px;
-    background: #C93;
+    background: #7ba613;
 }
 
 #viewport > #earth {
@@ -90,9 +90,9 @@ line.targetSize3 {
 }
 
 #viewport > .ship {
-    width: 7px;
-    height: 7px;
-    background: green;
+    width: 9px;
+    height: 9px;
+    background: #d2ff00;
 }
 
 #viewport > .scanning {
