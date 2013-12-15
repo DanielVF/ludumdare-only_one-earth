@@ -6,7 +6,19 @@ body{
 
 line { 
     stroke-width: 2;
-    stroke: white;
+    stroke: red;
+}
+
+line.targetSize1 {
+    stroke-width: 0.5;
+}
+
+line.targetSize2 {
+    stroke-width: 1;
+}
+
+line.targetSize3 {
+    stroke-width: 1;
 }
 
 #text { 
@@ -98,3 +110,4 @@ line {
 #viewport > .recharging {
     border-bottom: solid 1px blue;
 }
+

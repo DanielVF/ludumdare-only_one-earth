@@ -96,6 +96,7 @@ class Asteroid extends Thing
                 size = Math.ceil(Math.random() * @size)
                 vec = new Vector @vec.x, @vec.y, @vec.vx + Math.random() - 0.5, @vec.vy  + Math.random() - 0.5
                 a = new Asteroid vec, size, 'asteroid', el
+                a.hp = size
                 el = new_thing_el(a)
                 a.el = el
                 el.setAttribute('class', el.getAttribute("class")+" size"+size)
@@ -106,7 +107,7 @@ class Satellite extends Thing
     beam_el: undefined
     payload_state: "scanning"
     range: 80
-    recharge_time: 10
+    recharge_time: 5
     lock_chance: 0.3
     lock_time: 3
     dps: 0.5
@@ -140,7 +141,7 @@ class Satellite extends Thing
     payload_firing: (things)->
         @require_range()
         @target.hp -= @dps
-        if @target.hp < 1
+        if @target.hp < 0
             @target.kill()
             @be "reset"
     payload_reset: (things)->
@@ -278,13 +279,14 @@ game_step = ->
         el = thing.el
         el.style.left = thing.vec.x - thing.size / 2
         el.style.top = thing.vec.y - thing.size / 2
-        if (thing.target isnt null and thing.target isnt undefined) and (thing.target.is_dead isnt false)
+        if (thing.target isnt null and thing.target isnt undefined) and (thing.target.is_dead isnt true)
             if thing.beam_el is undefined
                 thing.beam_el = new_beam_el()
             thing.beam_el.setAttribute('x1', thing.vec.x)
             thing.beam_el.setAttribute('x2', thing.target.vec.x)
             thing.beam_el.setAttribute('y1', thing.vec.y)
             thing.beam_el.setAttribute('y2', thing.target.vec.y)
+            thing.beam_el.setAttribute('class', 'targetSize'+thing.target.size)
         else
             if thing.beam_el isnt undefined
                 thing.beam_el.parentNode.removeChild(thing.beam_el)
@@ -324,21 +326,21 @@ phases = [
     [300, P.go 3]
     [15000, P.go 0.1]
     [  1500, P.text "Wave 2/5"]
-    [  5000, P.go 2]
-    [15000, P.go 3]
-    [15000, P.go 1]
+    [  5000, P.go 0.2]
+    [15000, P.go 0.3]
+    [15000, P.go 0.1]
     [  1500, P.text "Wave 3/5"]
-    [  5000, P.go 2]
-    [15000, P.go 3]
-    [15000, P.go 1]
+    [  5000, P.go 0.2]
+    [15000, P.go 0.3]
+    [15000, P.go 0.1]
     [  1500, P.text "Wave 4/5"]
-    [  5000, P.go 2]
-    [15000, P.go 6]
-    [15000, P.go 1]
+    [  5000, P.go 0.2]
+    [15000, P.go 0.6]
+    [15000, P.go 0.1]
     [  1500, P.text "Wave 5/5"]
-    [  5000, P.go 2]
-    [15000, P.go 9]
-    [15000, P.go 1]
+    [  5000, P.go 0.2]
+    [15000, P.go 0.9]
+    [15000, P.go 0.4]
     
 ]
 
