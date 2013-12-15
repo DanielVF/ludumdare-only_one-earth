@@ -47,11 +47,13 @@ class Vector
 
 class Thing
     mass: 0
+    is_attached: false
     constructor: (@vec, @size, @class, @el)->
         #
     
     update: (other_bodies)->
-        @vec.update(other_bodies)
+        if @is_attached is not true
+            @vec.update(other_bodies)
         
     
         
@@ -87,12 +89,27 @@ class Satellite extends Thing
 
 class Ship extends Thing
     direction_radians: 0
-    is_forward = false
-    is_backward = false
-    is_counter_clockwise = false
-    is_clockwise = false
+    is_forward: false
+    is_backward: false
+    is_counter_clockwise: false
+    is_clockwise: false
+    is_attaching: false
+    attached: null
     
     update: (other_bodies)->
+        if @is_attaching and @attached  is null
+            @attached = closest_attachable(this)
+            if @attached  isnt null
+                @attached.is_attached = true
+                @attached.vec = @vec
+        
+        if (not @is_attaching) and @attached  isnt null
+            @attached.vec = new Vector(@vec.x, @vec.y, @vec.vx, @vec.vy)
+            @attached.is_attached = false
+            @attached = null
+            
+            
+        
         @vec.loop_around()
         if @is_forward
             @vec.vy -= 0.2
@@ -138,6 +155,11 @@ a_ship = ->
     thing.el = new_thing_el(thing)
     return thing
 
+closest_attachable = (thing)->
+    attachables = _.sortBy things, (x)->
+        thing.vec.distance(x.vec)
+    console.log attachables
+    attachables[1]
 
 earth = new Earth document.getElementById('earth')
 moon = new Moon document.getElementById('moon')
@@ -149,6 +171,7 @@ things = [earth, moon, sat(), sat(), sat(), sat(), sat(), sat(), sat(), sat(), s
 game_step = ->
     for thing in things
         thing.update(grav_bodies)
+    for thing in things
         el = thing.el
         el.style.left = thing.vec.x - thing.size / 2
         el.style.top = thing.vec.y - thing.size / 2
@@ -166,6 +189,7 @@ $(document).keyup (evt)->
         when 83 then ship.is_backward = false
         when 65 then ship.is_counter_clockwise = false
         when 68 then ship.is_clockwise = false
+        when 32 then ship.is_attaching = false
 
 $(document).keydown (evt)->
     switch evt.which
@@ -173,6 +197,7 @@ $(document).keydown (evt)->
         when 83 then ship.is_backward = true
         when 65 then ship.is_counter_clockwise = true
         when 68 then ship.is_clockwise = true
+        when 32 then ship.is_attaching = true
 
         
     
