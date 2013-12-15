@@ -208,10 +208,12 @@ moon_sat = ->
     return thing
     
 asteriod = ->
-    x = Math.random() * MAX_X
-    y = if Math.random() > 0.5 then 0 else MAX_Y
-    yv = Math.random() * 0.25 - 0.5
-    xv = Math.random() * 2 - 4
+    x = MAX_X
+    y = Math.random() * MAX_Y
+    # x = Math.random() * MAX_X
+    # y = if Math.random() > 0.5 then 0 else (MAX_Y - 3)
+    yv = Math.random() * 0.25 - 0.15
+    xv = Math.random() * 1 - 1.1
     vect = new Vector(x, y, xv, yv )
     thing = new Asteroid vect, 5,  "asteriod"
     thing.el = new_thing_el(thing)
@@ -236,7 +238,7 @@ moon = new Moon document.getElementById('moon')
 ship = a_ship()
 moon.vec.orbit earth
 grav_bodies = [earth, moon]    
-things = [earth, moon, sat(), sat(), sat(), sat(), asteriod(), ship]
+things = [earth, moon, sat(), sat(), sat(), sat(), asteriod(), ship, moon_sat(), moon_sat()]
 
 game_running = true
 asteroid_rate = 1
@@ -286,9 +288,9 @@ phases = [
     [  1500, P.text "you must save it"]
     [  1500, P.text "WASD to move.\n<br>\nhold [SPACEBAR] to hold a satellite."]
     [  1500, P.text "reposition satellites \n<br>\n to defend earth "]
-    [  5000, P.go 1]
-    [  5000, P.go 1]
-    [15000, P.go 2]
+    [  5000, P.go 0.2]
+    [  5000, P.go 0.5]
+    [15000, P.go 1]
     [300, P.go 30]
     [15000, P.go 1]
     [  1500, P.text "Wave 2/5"]
