@@ -43,11 +43,13 @@ class Vector
         
     orbit: (other)->
         dist = @distance(other.vec)
-        @vy = sqrt((pow(other.mass,2) * GRAV_CONSTANT) / dist) * 0.1
+        @vy = other.vec.vy + sqrt((pow(other.mass,2) * GRAV_CONSTANT) / dist) * 0.1
 
 class Thing
     mass: 0
     is_attached: false
+    is_dead: false
+    
     constructor: (@vec, @size, @class, @el)->
         #
     
@@ -55,7 +57,9 @@ class Thing
         if @is_attached is not true
             @vec.update(other_bodies)
         
-    
+    kill: ->
+        @is_dead = true
+        @el.parentNode.removeChild(@el) if @el isnt null and @el.parentNode
         
         
 class Earth extends Thing
@@ -78,14 +82,75 @@ class Moon extends Thing
         super no_moon
         
 class Asteroid extends Thing
+    hp: 5
+    
     update: (other_bodies)->
         @vec.loop_around()
         super other_bodies
 
 class Satellite extends Thing
-    update: (other_bodies)->
+    payload_state: "scanning"
+    range: 80
+    recharge_time: 10
+    lock_chance: 0.3
+    lock_time: 3
+    dps: 0.5
+    recharging_counter: 0
+    lock_counter: 0
+    target: null
+    
+    update: (other_bodies, things)->
         @vec.loop_around()
+        @update_payload(things)
         super other_bodies
+    
+    be: (state)->
+        @payload_state = state
+        @el.setAttribute("class", "#{@class} #{@payload_state}")
+    
+    payload_recharging: (things)->
+        @recharging_counter += 1
+        if @recharging_counter >= @recharge_time
+            @be "scanning"
+    payload_scanning: (things)->
+        if Math.random() < @lock_chance
+            @target = @pick_target(things)
+            if @target isnt null
+                @be "locking"
+    payload_locking: (things)->
+        @require_range()
+        @lock_counter += 1
+        if @lock_counter >= @lock_time
+            @be "firing"
+    payload_firing: (things)->
+        @require_range()
+        @target.hp -= @dps
+        if @target.hp < 1
+            @target.kill()
+            @be "reset"
+    payload_reset: (things)->
+        @target = null
+        @lock_counter = 0
+        @recharging_counter = 0
+        @be "recharging"
+    
+    require_range: ->
+        if @target isnt null and (@vec.distance(@target.vec) > @range or @target.is_dead)
+            @payload_state = "reset" 
+    
+    update_payload: (things)->
+        this["payload_"+@payload_state](things)
+            
+    
+    pick_target: (things)->
+        vec = @vec
+        asteroids = _.filter things, (x)-> 
+            x.constructor.name is "Asteroid"
+        closest = _.sortBy(asteroids, ((x)->vec.distance(x.vec)))[0]
+        if vec.distance(closest.vec) <= @range
+            return closest
+        else
+            return null
 
 class Ship extends Thing
     direction_radians: 0
@@ -108,8 +173,6 @@ class Ship extends Thing
             @attached.is_attached = false
             @attached = null
             
-            
-        
         @vec.loop_around()
         if @is_forward
             @vec.vy -= 0.2
@@ -128,11 +191,19 @@ new_thing_el = (thing)->
     return el
 
 sat = ->
-    x = MAX_X / 2 +  Math.random() * 200 + 20
+    x = MAX_X / 2 +  Math.random() * 150 + 20
     y = MAX_Y / 2
     vect = new Vector(x, y, 0, 0)
     vect.orbit earth
     thing = new Satellite vect, 5,  "satellite"
+    thing.el = new_thing_el(thing)
+    return thing
+
+moon_sat = ->
+    x = moon.vec.x + 20 + Math.random() * 10
+    vec = new Vector(x, moon.vec.y, moon.vec.vx, moon.vec.vy + 0.6)
+    # vec.orbit(moon)
+    thing = new Satellite vec, 5,  "satellite"
     thing.el = new_thing_el(thing)
     return thing
     
@@ -158,7 +229,6 @@ a_ship = ->
 closest_attachable = (thing)->
     attachables = _.sortBy things, (x)->
         thing.vec.distance(x.vec)
-    console.log attachables
     attachables[1]
 
 earth = new Earth document.getElementById('earth')
@@ -169,8 +239,10 @@ grav_bodies = [earth, moon]
 things = [earth, moon, sat(), sat(), sat(), sat(), sat(), sat(), sat(), sat(), sat(), asteriod(), ship]
 
 game_step = ->
+    things = _.filter things, (x)->
+        x.is_dead is false
     for thing in things
-        thing.update(grav_bodies)
+        thing.update(grav_bodies, things)
     for thing in things
         el = thing.el
         el.style.left = thing.vec.x - thing.size / 2
@@ -178,7 +250,8 @@ game_step = ->
     
 
 setInterval(game_step, 1000 / GAME_SPEED)
-setInterval((->things.push(asteriod()) ), 2 * 1000 )
+setInterval((->things.push(asteriod()) ), 0.2 * 1000 )
+setInterval((->things.push(moon_sat()) ), 5 * 1000 )
 
 
 

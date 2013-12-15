@@ -43,5 +43,21 @@ body{
 #viewport > .ship {
     width: 7px;
     height: 7px;
-    background: #dfd;
+    background: #green;
+}
+
+#viewport > .scanning {
+    border-bottom: solid 1px green;
+}
+
+#viewport > .locking {
+    border-bottom: solid 1px yellow;
+}
+
+#viewport > .firing {
+    border-bottom: solid 1px red;
+}
+
+#viewport > .recharging {
+    border-bottom: solid 1px blue;
 }
