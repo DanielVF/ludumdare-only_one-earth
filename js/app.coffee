@@ -281,7 +281,9 @@ a_ship = ->
 closest_attachable = (thing)->
     attachables = _.sortBy things, (x)->
         thing.vec.distance(x.vec)
-    attachables[1]
+    attachables  = _.filter attachables, (x)->
+        x.constructor.name is "Satellite" or x.constructor.name is "Asteroid"
+    attachables[0]
 
 earth = new Earth document.getElementById('earth')
 moon = new Moon document.getElementById('moon')
