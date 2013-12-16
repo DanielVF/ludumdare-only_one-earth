@@ -190,6 +190,8 @@ class Satellite extends Thing
         vec = @vec
         asteroids = _.filter things, (x)-> 
             x.constructor.name is "Asteroid" and x.is_dead isnt true
+        if asteroids.length == 0
+            return null
         closest = _.sortBy(asteroids, ((x)->vec.distance(x.vec)))[0]
         if vec.distance(closest.vec) <= @range
             return closest
@@ -289,7 +291,12 @@ grav_bodies = [earth, moon]
 things = [earth, moon, sat(), sat(), sat(), sat(), asteriod(), ship, moon_sat(), moon_sat()]
 
 game_running = true
+game_over = false
 asteroid_rate = 0.1
+
+P = {}
+phases = null
+current_phase = null
 
 create_asteriods = ->
     if Math.random() < asteroid_rate / GAME_SPEED
@@ -304,6 +311,17 @@ pad = (num, size)->
 
 game_step = ->
     return if not game_running 
+    return if game_over
+    if game_over is false and earth.population is 0
+        game_over = true
+        phases = [
+            [2000, P.text("game over")]
+            [2000, P.text("game over")]
+            [12000, P.text("earth is<br>dead")]
+        ]
+        current_phase = 0
+        nextPhase()
+    
     create_asteriods()
     things = _.filter things, (x)->
         x.is_dead is false
@@ -330,7 +348,7 @@ game_step = ->
     
 
 setInterval(game_step, 1000 / GAME_SPEED)
-setInterval((->things.push(moon_sat()) ), 5 * 1000 )
+setInterval((->things.push(moon_sat()) ), 8 * 1000 )
 
 
 P = {
@@ -366,28 +384,31 @@ phases = [
     [15000, P.go 0.1]
     [  1500, P.text "Wave 2/5"]
     [  5000, P.go 0.2]
-    [300, P.go 6]
-    [15000, P.go 0.3]
-    [15000, P.go 0.1]
-    [  1500, P.text "Wave 3/5"]
-    [  5000, P.go 0.2]
     [300, P.go 9]
     [15000, P.go 0.3]
-    [15000, P.go 0.1]
+    [10000, P.go 0.25]
+    [  1500, P.text "Wave 3/5"]
+    [  5000, P.go 0.2]
+    [300, P.go 20]
+    [15000, P.go 0.4]
+    [10000, P.go 0.3]
     [  1500, P.text "Wave 4/5"]
     [  5000, P.go 0.2]
-    [300, P.go 12]
+    [300, P.go 20]
     [15000, P.go 0.6]
-    [15000, P.go 0.1]
+    [10000, P.go 0.1]
     [  1500, P.text "Wave 5/5"]
     [  5000, P.go 0.2]
-    [300, P.go 12]
+    [300, P.go 20]
     [15000, P.go 0.9]
-    [300, P.go 12]
-    [15000, P.go 24]
+    [300, P.go 20]
     [15000, P.go 0.4]
-    
+    [25000, P.go 0.2]
+    [2500, P.text "You have Won"]   
+    [25000, P.go 0.6]
 ]
+
+
 
 nextPhase  = ->
     [duration, fn] = phases[current_phase]
@@ -422,3 +443,4 @@ $(document).keydown (evt)->
     return true
 
         
+window.earth = earth
